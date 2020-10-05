@@ -1,0 +1,49 @@
+version: '2.3'
+
+services:
+  mqttbroker:
+    image: eclipse-mosquitto
+    hostname: mqttbroker
+    expose:
+      - "1883"
+      - "9001"
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - default
+
+  smart-football-table-detection: 
+    build:
+      dockerfile: Dockerfile-arm
+      context: smart-football-table-detection
+    environment:
+      - MQTTHOST=mqttbroker
+      - MQTTPORT=1883
+    depends_on:
+      - "mqttbroker"
+
+  smart-football-table-cognition: 
+    image: smart-football-table/cognition:latest
+    environment:
+      - MQTTHOST=mqttbroker
+      - MQTTPORT=1883
+      - TABLEWIDTH=68
+      - TABLEHEIGHT=120
+    depends_on:
+      - "mqttbroker"
+
+  smart-football-table-ui:
+    image: tianon/true
+      #    build:
+      # context: smart-football-table-ui
+      # volumes:
+      #- '.:/usr/src/app'
+      #- '/usr/src/app/node_modules'
+        #ports:
+        #- '80:80'
+        #depends_on:
+        #- "mqttbroker"
+
