@@ -19,9 +19,15 @@ services:
     build:
       dockerfile: Dockerfile-arm
       context: smart-football-table-detection
+    devices:
+      - /dev/video0
     environment:
       - MQTTHOST=mqttbroker
       - MQTTPORT=1883
+      - LD_LIBRARY_PATH=/opt/vc/lib 
+    volumes:
+      - /opt/vc:/opt/vc 
+      - /dev/video0:/dev/video0 
     depends_on:
       - "mqttbroker"
 
@@ -36,14 +42,14 @@ services:
       - "mqttbroker"
 
   smart-football-table-ui:
-    image: tianon/true
-      #    build:
-      # context: smart-football-table-ui
-      # volumes:
-      #- '.:/usr/src/app'
-      #- '/usr/src/app/node_modules'
-        #ports:
-        #- '80:80'
-        #depends_on:
-        #- "mqttbroker"
+    build:
+      dockerfile: Dockerfile-arm
+      context: smart-football-table-ui
+    volumes:
+      - '.:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    ports:
+      - '80:80'
+    depends_on:
+      - "mqttbroker"
 
